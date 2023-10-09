@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive } from "vue";
+import { ref, reactive, onMounted, watch } from "vue";
 import { uid } from "uid";
 import HeaderVue from "./components/Header.vue";
 import Formulario from "./components/Formulario.vue";
@@ -16,21 +16,49 @@ const paciente = reactive({
   sintomas: "",
 });
 
+watch(pacientes, () =>{
+  guardarLocalStorage()
+},{
+  deep: true
+})
+onMounted(() => {
+  const pacienteStorage = localStorage.getItem("pacientes");
+  if (pacienteStorage) {
+    pacientes.value = JSON.parse(pacienteStorage);
+  }
+});
+const guardarLocalStorage = () => {
+  localStorage.setItem("pacientes", JSON.stringify(pacientes.value))
+}
 const guardarPaciente = () => {
-  pacientes.value.push({
-    ...paciente,
-    id: uid(),
-  });
-  Object.assign(alerta, {
+  if (paciente.id) {
+    const { id } = paciente;
+    const i = pacientes.value.findIndex((paciente) => pacienteState.id === id);
+    pacientes.value[i] = { ...paciente };
+  } else {
+    pacientes.value.push({
+      ...paciente,
+      id: uid(),
+    });
+  }
+
+  Object.assign(paciente, {
     nombre: "",
     propietario: "",
     email: "",
     alta: "",
     sintomas: "",
+    id: null,
   });
 };
-const actualizarPaciente = () => {
-  console.log("actualizando");
+const actualizarPaciente = (id) => {
+  const pacienteEditar = pacientes.value.filter(
+    (paciente) => paciente.id === id
+  )[0];
+  Object.assign(paciente, pacienteEditar);
+};
+const eliminarPaciente = (id) => {
+  pacientes.value = pacientes.value.filter((paciente) => paciente.id !== id);
 };
 </script>
 
@@ -45,6 +73,7 @@ const actualizarPaciente = () => {
         v-model:alta="paciente.alta"
         v-model:sintomas="paciente.sintomas"
         @guardar-paciente="guardarPaciente"
+        :id="paciente.id"
       />
       <div class="md:w-1/2 md:h-screen">
         <h3 class="font-black text-3xl text-center">
@@ -58,7 +87,8 @@ const actualizarPaciente = () => {
           <Paciente
             v-for="paciente in pacientes"
             :paciente="paciente"
-            @actualizando="actualizarPaciente"
+            @actualizar="actualizarPaciente"
+            @eliminar="eliminarPaciente"
           />
         </div>
         <p v-else class="mt-10 text-2xl text-center">No hay pacientes</p>

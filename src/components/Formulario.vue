@@ -1,49 +1,57 @@
 <script setup>
-  import { reactive } from "vue";
-  import Alert from "./Alert.vue";
+import { reactive } from "vue";
+import Alert from "./Alert.vue";
 
-  const alerta = reactive({
-    tipo: "",
-    mensaje: "",
-  });
-  const emit = defineEmits([
-    "update:nombre",
-    "update:propietario",
-    "update:email",
-    "update:alta",
-    "update:sintomas",
-    "guardar-paciente",
-  ]);
-  const props = defineProps({
-    nombre: {
-      type: String,
-      required: true,
-    },
-    propietario: {
-      type: String,
-      required: true,
-    },
-    email: {
-      type: String,
-      required: true,
-    },
-    alta: {
-      type: String,
-      required: true,
-    },
-    sintomas: {
-      type: String,
-      required: true,
-    },
-  });
-  const validar = () => {
-    if (Object.values(props).includes("")) {
-      alerta.mensaje = "todos los campos son obligatorios";
-      alerta.tipo = "error";
-      return;
-    } 
-    emit('guardar-paciente')
+const alerta = reactive({
+  tipo: "",
+  mensaje: "",
+});
+const emit = defineEmits([
+  "update:nombre",
+  "update:propietario",
+  "update:email",
+  "update:alta",
+  "update:sintomas",
+  "guardar-paciente",
+]);
+const props = defineProps({
+  nombre: {
+    type: String,
+    required: true,
+  },
+  propietario: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+  },
+  alta: {
+    type: String,
+    required: true,
+  },
+  sintomas: {
+    type: String,
+    required: true,
+  },
+});
+const validar = () => {
+  if (Object.values(props).includes("")) {
+    alerta.mensaje = "todos los campos son obligatorios";
+    alerta.tipo = "error";
+    return;
   }
+  emit("guardar-paciente");
+  alerta.mensaje = "Paciente almacenado correctamente";
+  alerta.tipo = "exito";
+  setTimeout(() => {
+    Object.assign(alerta, {
+      tipo: "",
+      mensaje: "",
+    });
+  }, 3000);
+};
 </script>
 
 <template>
